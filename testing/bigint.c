@@ -39,7 +39,24 @@ void biPrint(bigint* bi)
 	}
 	if (!foundNon0) printf("0");
 }
-
+char biCompar(bigint* i1, bigint* i2) // 1 means i1 > i2
+{
+	bigint* in1;
+	bigint* in2;
+	if (i1->size >= i2->size){in1=i1;in2=i2;}
+	else{in1=i2;in2=i1;}
+	int i = in1->size-1;
+	for (;i>=in2->size;i--)
+	{
+		if (in1->hms[i] != 0) return 1;
+	}
+	for (;i>=0;i--)
+	{
+		if (in1->hms[i] > in2->hms[i]) return 1;
+		else if (in1->hms[i] < in2->hms[i]) return -1;
+	}
+	return 0;
+}
 bigint biCreate(int i)
 {
 	bigint bi;
@@ -142,16 +159,15 @@ bigint biMul(bigint* n1, bigint* n2)
 {
 	bigint bi     = biCreateSize(n1->size + n2->size + 2);
 	bigint tempBi = biCreateSize(n1->size + n2->size + 2);
-	printf("tempBi.size=%i\n", tempBi.size);
 	int i = 0;
 	for (;i<n1->size;i++)
 	{
-		printf("biMul()\n");
 		int j = 0;
 		for (;j<n2->size;j++)
 		{
-			unsigned long tempL = n1->hms[i] * n2->hms[j];
-			if (tempL!=0) printf("tempL=%lu=%i*%i\n", tempL, n1->hms[i], n2->hms[j]);
+			unsigned long tempL = (unsigned long)n1->hms[i] * (unsigned long)n2->hms[j];
+			printf("%i * %i = %lu\n", n1->hms[i], n2->hms[j], tempL);
+			if (tempL==0) continue;
 			unsigned int n1 = tempL % (100*1000*1000); // small
 			unsigned int n2 = tempL / (100*1000*1000); // big
 			biClear(&tempBi);
@@ -165,10 +181,11 @@ bigint biMul(bigint* n1, bigint* n2)
 
 int main()
 {
-	char str[] = "1234321234321234321234321234321";
+	char str[] = "123432123";
 	bigint i1 = biFromString(&str[0]);
-	bigint i2 = biCreate(2);
-	bigint bi = biMul(&i1, &i2);
+	
+	//char str2[] = "123";
+	bigint i2 = biCopy(&i1);//biFromString(&str2[0]);
 	
 	biPrint(&i1);
 	printf("\n");
@@ -176,8 +193,10 @@ int main()
 	biPrint(&i2);
 	printf("\n");
 	
-	biPrint(&bi);
-	printf("\n");
+	bigint bi = biMul(&i1, &i2);
+	
+	//biPrint(&bi);
+	//printf("\n");
 	
 	printf("[0]=%u\n", bi.hms[0]);
 	printf("[1]=%u\n", bi.hms[1]);
